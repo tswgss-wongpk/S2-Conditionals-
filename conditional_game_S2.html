@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Quest 條件句時空冒險</title>
+    <!-- Tailwind CSS for vibrant UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for friendly rounded typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f0728 100%);
+            overflow-x: hidden;
+        }
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+        .neon-border {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+        .pulse-slow {
+            animation: pulse 3s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        /* Shake effect for wrong answers */
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-purple-500 selection:text-white">
+
+    <!-- Background Canvas for Confetti Star Shower -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-4xl mx-auto px-4 py-4 flex justify-between items-center z-10">
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="goHome()">
+            <span class="text-3xl">🚀</span>
+            <span class="font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">CONDITIONAL QUEST</span>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleCheatSheet()" class="bg-indigo-900/60 border border-indigo-500/50 hover:bg-indigo-800 text-purple-300 font-bold px-4 py-2 rounded-full text-sm transition-all flex items-center gap-1">
+                📖 傳送指南 (Rules)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 flex flex-col justify-center items-center py-6 z-10">
+        
+        <!-- ================= INTRO SCREEN ================= -->
+        <div id="screen-intro" class="w-full text-center space-y-8 py-8 animate-fade-in">
+            <div class="relative inline-block">
+                <!-- Mascot / Robot -->
+                <div class="text-8xl animate-bounce duration-1000">🤖</div>
+                <div class="absolute -top-4 -right-4 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">S2 Target!</div>
+            </div>
+            
+            <div class="space-y-3">
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
+                    <span class="block text-slate-100">條件句</span>
+                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 neon-glow mt-1">時空冒險記</span>
+                </h1>
+                <p class="text-slate-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+                    時空傳送門故障了！快跟著 AI 助手「格米 (Grammy)」一起運用正確的 <b>Conditional Sentences</b> 修復時空漏洞，拯救宇宙吧！🌌
+                </p>
+            </div>
+
+            <!-- Level Previews / Start Button -->
+            <div class="max-w-md mx-auto bg-slate-900/60 p-6 rounded-3xl border border-indigo-500/30 backdrop-blur-md space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center text-sm border-b border-indigo-900/50 pb-3">
+                    <span class="text-slate-400">冒險進度:</span>
+                    <span id="global-progress-badge" class="bg-purple-900/80 text-purple-200 px-3 py-1 rounded-full font-bold">未開始</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-left">
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <div class="text-xs text-slate-400">Level 1 (Type 0)</div>
+                        <div class="font-bold text-cyan-400">🕒 事實與常理</div>
+                    </div>
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <div class="text-xs text-slate-400">Level 2 (Type 1)</div>
+                        <div class="font-bold text-pink-400">🔮 未來可能性</div>
+                    </div>
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <div class="text-xs text-slate-400">Level 3 (Type 2)</div>
+                        <div class="font-bold text-purple-400">💭 虛擬幻想</div>
+                    </div>
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <div class="text-xs text-slate-400">Level 4 (Boss)</div>
+                        <div class="font-bold text-yellow-400">👾 終極混合考驗</div>
+                    </div>
+                </div>
+                
+                <button onclick="startAdventure()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xl py-4 rounded-2xl shadow-lg shadow-pink-500/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150">
+                    立刻啟航 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL SELECT SCREEN ================= -->
+        <div id="screen-level-select" class="w-full max-w-2xl mx-auto space-y-6 hidden animate-fade-in">
+            <h2 class="text-3xl font-extrabold text-center text-slate-100">選擇冒險關卡</h2>
+            <p class="text-center text-slate-400">你需要成功解鎖並通過前一個關卡，才能挑戰更進階的時空！</p>
+            
+            <div class="space-y-4" id="level-list-container">
+                <!-- Level Cards will be generated dynamically -->
+            </div>
+            
+            <div class="text-center pt-4">
+                <button onclick="showScreen('screen-intro')" class="text-slate-400 hover:text-slate-200 transition-colors">
+                    ⬅ 帶我回首頁
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= GAMEPLAY SCREEN ================= -->
+        <div id="screen-gameplay" class="w-full max-w-2xl mx-auto hidden animate-fade-in">
+            <!-- Game Status Bar -->
+            <div class="flex justify-between items-center mb-6 bg-slate-900/40 p-4 rounded-2xl border border-indigo-900/30">
+                <div class="flex items-center space-x-3">
+                    <span id="level-badge" class="bg-purple-600 text-white text-xs md:text-sm font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider">Level 1</span>
+                    <span id="lives-container" class="text-xl md:text-2xl flex gap-1">
+                        <!-- Hearts will be rendered here dynamically -->
+                    </span>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-indigo-300">總分數 Score</div>
+                    <div id="score-display" class="text-2xl font-black text-yellow-400">0</div>
+                </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="w-full bg-slate-900/60 rounded-full h-3 mb-8 overflow-hidden border border-slate-700/50">
+                <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 to-purple-500 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- The Question Card Area -->
+            <div id="question-card" class="bg-slate-900/80 p-6 md:p-8 rounded-3xl border-2 border-indigo-500/40 shadow-2xl relative space-y-6">
+                <!-- Grammy Floating Dialog -->
+                <div class="flex items-start gap-4 pb-4 border-b border-indigo-950">
+                    <div class="text-4xl">🤖</div>
+                    <div class="bg-indigo-950/80 text-cyan-200 text-sm p-3 rounded-2xl border border-indigo-800 flex-grow relative">
+                        <div class="absolute w-2 h-2 bg-indigo-950 border-l border-b border-indigo-800 rotate-45 -left-1 top-4"></div>
+                        <span id="bot-instruction">請幫我填補傳送門的語法裂縫！</span>
+                    </div>
+                </div>
+
+                <!-- Sentence with Blanks -->
+                <div class="py-6 text-center">
+                    <h3 id="sentence-text" class="text-xl md:text-3xl font-bold leading-relaxed text-slate-100 select-none tracking-wide">
+                        If we <span class="text-purple-400 underline decoration-wavy">[___]</span> ice, it <span class="text-pink-400 underline decoration-wavy">[___]</span>.
+                    </h3>
+                    <p id="sentence-translation" class="text-slate-400 text-sm mt-3">( 如果我們加熱冰塊，它就會融化。 )</p>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4">
+                    <!-- Option buttons will be generated here -->
+                </div>
+            </div>
+
+            <!-- Hint Button -->
+            <div class="text-center mt-6">
+                <button onclick="toggleCheatSheet()" class="text-slate-400 hover:text-cyan-300 text-sm font-semibold underline underline-offset-4 flex items-center justify-center gap-1 mx-auto transition-colors">
+                    💡 這關是什麼文法？看一眼「傳送指南」
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL COMPLETE SCREEN ================= -->
+        <div id="screen-level-complete" class="w-full max-w-md mx-auto text-center space-y-6 hidden animate-fade-in">
+            <div class="text-7xl">🎉</div>
+            <div class="space-y-2">
+                <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">傳送成功！</h2>
+                <p id="level-complete-desc" class="text-slate-300">你成功修復了這個時空維度！</p>
+            </div>
+
+            <!-- Star Rating Visualizer -->
+            <div id="stars-display" class="flex justify-center text-5xl gap-2 py-4">
+                <span>⭐</span><span>⭐</span><span>⭐</span>
+            </div>
+
+            <!-- Score Stats Box -->
+            <div class="bg-slate-900/60 p-6 rounded-3xl border border-indigo-500/30 space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">關卡分數:</span>
+                    <span id="lc-score" class="font-bold text-yellow-400">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">答對題數:</span>
+                    <span id="lc-accuracy" class="font-bold text-green-400">5 / 5</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">剩餘生命值:</span>
+                    <span id="lc-lives" class="font-bold text-pink-500">❤️ ❤️ ❤️</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="next-level-btn" onclick="nextAction()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-extrabold text-lg py-4 rounded-2xl shadow-lg transition-all">
+                    前往下一關 🚀
+                </button>
+                <button onclick="showScreen('screen-level-select')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-2xl transition-all">
+                    返回關卡選擇 🗺
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= GAME OVER SCREEN ================= -->
+        <div id="screen-game-over" class="w-full max-w-md mx-auto text-center space-y-6 hidden animate-fade-in">
+            <div class="text-7xl">👾</div>
+            <div class="space-y-2">
+                <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-600">時空崩塌！</h2>
+                <p class="text-slate-300">時空縫隙過大，能源已耗盡。格米需要你重整旗鼓！</p>
+            </div>
+
+            <!-- Stats Box -->
+            <div class="bg-slate-900/60 p-6 rounded-3xl border border-red-500/20 space-y-2 text-left">
+                <p class="text-slate-400">💡 <span class="font-bold text-slate-200">格米的溫馨提示：</span></p>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    在作答時可以多留意連接詞 <b>If</b> 後面的動詞時態喔！如果是 Type 1 要用 Present Simple，如果是 Type 2 則要用 Past Simple 喔！
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="retryCurrentLevel()" class="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-extrabold text-lg py-4 rounded-2xl shadow-lg transition-all">
+                    重新挑戰此關 🔄
+                </button>
+                <button onclick="showScreen('screen-level-select')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-2xl transition-all">
+                    回到關卡選單 🗺
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= VICTORY SCREEN ================= -->
+        <div id="screen-victory" class="w-full max-w-md mx-auto text-center space-y-6 hidden animate-fade-in">
+            <div class="text-8xl animate-bounce">🏆</div>
+            <div class="space-y-2">
+                <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-500 neon-glow">宇宙級文法大師</h2>
+                <p class="text-emerald-300 font-bold">🎉 完美修復全宇宙時空門！</p>
+            </div>
+
+            <p class="text-slate-400 text-sm">
+                你成功攻克了 Type 0, 1, 2 條件句的所有難關！你現在是全港中二級最厲害的英語時空探險家了！
+            </p>
+
+            <!-- Master Certificate -->
+            <div class="bg-gradient-to-br from-indigo-900/80 to-purple-900/80 p-6 rounded-3xl border-2 border-yellow-500 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 text-slate-700/20 text-9xl font-black select-none pointer-events-none">S2</div>
+                <div class="text-xs uppercase tracking-widest text-yellow-400 font-bold">Certificate of Completion</div>
+                <div class="text-2xl font-bold mt-2 text-slate-100">時空修補結業證書</div>
+                <div class="mt-4 border-t border-slate-700/60 pt-4 flex justify-between text-left text-sm">
+                    <div>
+                        <div class="text-xs text-slate-400">探險家</div>
+                        <div class="font-bold text-slate-200">S2 Grammar Hero</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400">終極得分</div>
+                        <div id="final-score" class="font-bold text-yellow-400 text-lg">999</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="resetGameProgress()" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-white font-extrabold text-lg py-4 rounded-2xl shadow-lg transition-all">
+                    重首開始冒險 🚀
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-6 text-slate-500 text-xs border-t border-indigo-950 max-w-4xl mx-auto z-10">
+        <p>© 2026 條件句時空冒險 (Conditional Quest) - 專為 HK Secondary 2 學生設計的互動文法遊戲</p>
+    </footer>
+
+    <!-- ================= CUSTOM MODALS & OVERLAYS ================= -->
+    
+    <!-- Question Feedback Modal (Popup after answering) -->
+    <div id="feedback-modal" class="fixed inset-0 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-sm z-50 hidden">
+        <div id="feedback-box" class="w-full max-w-md p-6 md:p-8 rounded-3xl border-2 text-center space-y-6 transform scale-95 opacity-0 transition-all duration-300">
+            <div id="feedback-icon" class="text-6xl animate-pulse">🎉</div>
+            
+            <div class="space-y-2">
+                <h3 id="feedback-title" class="text-2xl md:text-3xl font-extrabold">非常好！回答正確</h3>
+                <p id="feedback-subtitle" class="text-slate-400 text-sm">時空傳送穩定度提升！</p>
+            </div>
+
+            <!-- Explainer Box -->
+            <div class="bg-indigo-950/80 p-4 rounded-2xl border border-indigo-900 text-left text-sm space-y-2">
+                <div class="font-bold text-cyan-300">🧠 時空能量解析 (Explanation)：</div>
+                <p id="feedback-explanation" class="text-slate-300 leading-relaxed"></p>
+            </div>
+
+            <button onclick="closeFeedbackAndContinue()" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-extrabold text-lg py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-600/30">
+                繼續修復 ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- Rule / Cheat Sheet Drawer (Slide over / Modal) -->
+    <div id="cheat-sheet-modal" class="fixed inset-0 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-md z-50 hidden">
+        <div class="w-full max-w-2xl bg-slate-900 border-2 border-indigo-500/60 p-6 md:p-8 rounded-3xl max-h-[85vh] overflow-y-auto space-y-6 shadow-2xl relative">
+            <button onclick="toggleCheatSheet()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-200 text-2xl">✕</button>
+            
+            <div class="text-center space-y-1">
+                <span class="text-4xl">📖</span>
+                <h3 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">時空傳送指南 (Grammar Rule)</h3>
+                <p class="text-slate-400 text-xs md:text-sm">搞懂這三大條件句，修復時空超輕鬆！</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Type 0 -->
+                <div class="p-4 bg-slate-800/40 rounded-2xl border border-slate-700/60">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">🕒</span>
+                        <h4 class="font-bold text-cyan-400">Zero Conditional (Type 0) - 事實與常理</h4>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-2">用於科學真理、習慣或不變的事實（恆常如此）。</p>
+                    <div class="bg-indigo-950/60 p-2.5 rounded-xl text-xs space-y-1 font-mono text-slate-300">
+                        <div><span class="text-pink-400">If / When</span> + Present Simple, + Present Simple</div>
+                        <div class="text-slate-500 mt-1">// If you heat ice, it melts.</div>
+                    </div>
+                </div>
+
+                <!-- Type 1 -->
+                <div class="p-4 bg-slate-800/40 rounded-2xl border border-slate-700/60">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">🔮</span>
+                        <h4 class="font-bold text-pink-400">First Conditional (Type 1) - 未來可能性</h4>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-2">用於在未來**極可能**發生的事情（有很大機率實現）。</p>
+                    <div class="bg-indigo-950/60 p-2.5 rounded-xl text-xs space-y-1 font-mono text-slate-300">
+                        <div><span class="text-pink-400">If</span> + Present Simple, + will + Infinitive (動詞原形)</div>
+                        <div class="text-slate-500 mt-1">// If it rains tomorrow, we will stay at home.</div>
+                    </div>
+                </div>
+
+                <!-- Type 2 -->
+                <div class="p-4 bg-slate-800/40 rounded-2xl border border-slate-700/60">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">💭</span>
+                        <h4 class="font-bold text-purple-400">Second Conditional (Type 2) - 虛擬幻想</h4>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-2">與**現在事實相反**的白日夢、幻想、或機率極低的設想。</p>
+                    <div class="bg-indigo-950/60 p-2.5 rounded-xl text-xs space-y-1 font-mono text-slate-300">
+                        <div><span class="text-pink-400">If</span> + Past Simple, + would/could + Infinitive</div>
+                        <div class="text-slate-500 mt-1">// If I won the lottery, I would buy a spaceship.</div>
+                        <div class="text-cyan-400 font-bold mt-1 text-[10px]">// 注意: Type 2中，If子句的Be動詞一律傾向用 "were" (e.g. If I were you...)</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="toggleCheatSheet()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl transition-all">
+                我知道了，關閉指南
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT GAME LOGIC ================= -->
+    <script>
+        // ================= AUDIO SYNTHESIZER =================
+        // Generates simple playful sound effects using Web Audio API (no external files needed)
+        const playSound = (type) => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                if (type === 'correct') {
+                    // Two-tone rising upbeat chirp
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    // Buzz fall down tone
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sawtooth';
+                    
+                    osc.frequency.setValueAtTime(180, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                } else if (type === 'victory' || type === 'level-up') {
+                    // Fun fanfare
+                    const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+                    notes.forEach((freq, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.08, ctx.currentTime + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + i * 0.1 + 0.3);
+                        osc.start(ctx.currentTime + i * 0.1);
+                        osc.stop(ctx.currentTime + i * 0.1 + 0.35);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked by browser policy");
+            }
+        };
+
+        // ================= CONFETTI PARTICLE SYSTEM =================
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let confettiAnimationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        class ConfettiParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 8 + 6;
+                this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 5 - 2.5;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height) {
+                    this.y = -20;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function initConfetti() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new ConfettiParticle());
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            confettiAnimationId = requestAnimationFrame(animateConfetti);
+        }
+
+        function startConfetti() {
+            canvas.classList.remove('hidden');
+            resizeCanvas();
+            initConfetti();
+            animateConfetti();
+            setTimeout(() => {
+                stopConfetti();
+            }, 4000);
+        }
+
+        function stopConfetti() {
+            canvas.classList.add('hidden');
+            if (confettiAnimationId) {
+                cancelAnimationFrame(confettiAnimationId);
+            }
+        }
+
+        // ================= GAME DATA (QUESTIONS) =================
+        const levelsData = [
+            {
+                id: 0,
+                title: "Level 1: 🕒 事實與常理",
+                subtitle: "Zero Conditional (Type 0)",
+                desc: "掌握不變的規律，修理時空基本架構！",
+                color: "cyan",
+                questions: [
+                    {
+                        sentence: "If you <span class='text-cyan-400 underline decoration-wavy'>heat</span> ice, it <span class='text-cyan-400 underline decoration-wavy'>______</span>.",
+                        translation: "如果你加熱冰塊，它就會融化。",
+                        options: [
+                            { text: "melts", correct: true },
+                            { text: "melted", correct: false },
+                            { text: "will melt", correct: false },
+                            { text: "would melt", correct: false }
+                        ],
+                        explanation: "這屬於 <b>Type 0 條件句</b>（不變真理）。公式為 [If + Present Simple, + Present Simple]。 主語是 'it' (單數)，所以動詞 'melt' 要加 -s 變成 'melts'。"
+                    },
+                    {
+                        sentence: "If you <span class='text-cyan-400 underline decoration-wavy'>______</span> water in the freezer, it turns into ice.",
+                        translation: "如果你把水放進冷凍庫，它就會結冰。",
+                        options: [
+                            { text: "put", correct: true },
+                            { text: "putting", correct: false },
+                            { text: "will put", correct: false },
+                            { text: "puts", correct: false }
+                        ],
+                        explanation: "這是不變的物理規律（Type 0）。If引導的條件句使用現在簡單式，主語是 'you'，所以使用動詞原形 'put'。"
+                    },
+                    {
+                        sentence: "Plants <span class='text-cyan-400 underline decoration-wavy'>die</span> if they <span class='text-cyan-400 underline decoration-wavy'>______</span> enough water.",
+                        translation: "如果植物沒有足夠的水，它們就會枯死。",
+                        options: [
+                            { text: "don't get", correct: true },
+                            { text: "didn't get", correct: false },
+                            { text: "won't get", correct: false },
+                            { text: "doesn't get", correct: false }
+                        ],
+                        explanation: "植物沒水會死是自然現象（Type 0）。If後面的主語是 'they' (複數)，在現在簡單式否定句中，我們要使用 'don't get'。"
+                    },
+                    {
+                        sentence: "If I <span class='text-cyan-400 underline decoration-wavy'>______</span> too much coffee at night, I cannot sleep.",
+                        translation: "如果我晚上喝太多咖啡，我會睡不著。",
+                        options: [
+                            { text: "drink", correct: true },
+                            { text: "drank", correct: false },
+                            { text: "will drink", correct: false },
+                            { text: "drinks", correct: false }
+                        ],
+                        explanation: "這是個人的習慣和生理規律（Type 0）。If 之後的主語是 'I'，在現在簡單式中使用動詞原形 'drink'。"
+                    }
+                ]
+            },
+            {
+                id: 1,
+                title: "Level 2: 🔮 未來可能性",
+                subtitle: "First Conditional (Type 1)",
+                desc: "預測時空支流，引導合理的未來！",
+                color: "pink",
+                questions: [
+                    {
+                        sentence: "If it <span class='text-pink-400 underline decoration-wavy'>rains</span> tomorrow, we <span class='text-pink-400 underline decoration-wavy'>______</span> the picnic.",
+                        translation: "如果明天下雨，我們就會取消野餐。",
+                        options: [
+                            { text: "will cancel", correct: true },
+                            { text: "cancel", correct: false },
+                            { text: "cancelled", correct: false },
+                            { text: "would cancel", correct: false }
+                        ],
+                        explanation: "這是一個可能發生的未來情況（Type 1）。公式是 [If + Present Simple, + will + 動詞原形]。因此後段要用 'will cancel'。"
+                    },
+                    {
+                        sentence: "You will fail the quiz if you <span class='text-pink-400 underline decoration-wavy'>______</span> hard.",
+                        translation: "如果你不努力溫習，你測驗就會不合格。",
+                        options: [
+                            { text: "don't study", correct: true },
+                            { text: "won't study", correct: false },
+                            { text: "didn't study", correct: false },
+                            { text: "not study", correct: false }
+                        ],
+                        explanation: "這是未來的潛在後果（Type 1）。主要子句已經用了 'will fail'，If 子句必須用現在簡單式。主語是 'you'，所以否定句使用 'don't study'。"
+                    },
+                    {
+                        sentence: "If you <span class='text-pink-400 underline decoration-wavy'>finish</span> your homework, I <span class='text-pink-400 underline decoration-wavy'>______</span> you play games.",
+                        translation: "如果你做完功課，我就會讓你玩遊戲。",
+                        options: [
+                            { text: "will let", correct: true },
+                            { text: "let", correct: false },
+                            { text: "letting", correct: false },
+                            { text: "would let", correct: false }
+                        ],
+                        explanation: "這是基於條件的未來承諾（Type 1）。If 引導的子句使用 'finish' (現在簡單式)，主要子句使用 [will + let]。"
+                    },
+                    {
+                        sentence: "If Grammy <span class='text-pink-400 underline decoration-wavy'>______</span> some energy drinks, he will feel much better.",
+                        translation: "如果格米喝點能量飲料，他會感覺好很多。",
+                        options: [
+                            { text: "drinks", correct: true },
+                            { text: "drink", correct: false },
+                            { text: "will drink", correct: false },
+                            { text: "drank", correct: false }
+                        ],
+                        explanation: "這是一個很有可能發生的未來狀況（Type 1）。If 引導的子句需用現在簡單式。主語 'Grammy' 是單數第三人稱，因此動詞要使用 'drinks'。"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Level 3: 💭 虛擬幻想",
+                subtitle: "Second Conditional (Type 2)",
+                desc: "與現實相反的異次元，考驗虛擬幻想語氣！",
+                color: "purple",
+                questions: [
+                    {
+                        sentence: "If I <span class='text-purple-400 underline decoration-wavy'>won</span> the lottery, I <span class='text-purple-400 underline decoration-wavy'>______</span> a huge mansion.",
+                        translation: "如果我中了彩票（機率極低），我會買一座超級豪宅。",
+                        options: [
+                            { text: "would buy", correct: true },
+                            { text: "will buy", correct: false },
+                            { text: "bought", correct: false },
+                            { text: "buy", correct: false }
+                        ],
+                        explanation: "這是一個與現在事實相反的白日夢（Type 2）。公式為 [If + Past Simple, + would + 動詞原形]。If 子句用了 'won' (Past Simple)，主要子句就要用 'would buy'。"
+                    },
+                    {
+                        sentence: "If I <span class='text-purple-400 underline decoration-wavy'>______</span> you, I would study harder for the S2 exams.",
+                        translation: "如果我是你（但我不是你），我會為中二考試更加努力溫習。",
+                        options: [
+                            { text: "were", correct: true },
+                            { text: "am", correct: false },
+                            { text: "was", correct: false },
+                            { text: "be", correct: false }
+                        ],
+                        explanation: "這是對現在不可能發生的虛擬假設（Type 2）。**超級考點**：在 Type 2 條件句中，不論主語是什麼，Be動詞都更傾向使用 <b>'were'</b> 喔！"
+                    },
+                    {
+                        sentence: "If she <span class='text-purple-400 underline decoration-wavy'>______</span> wings, she would fly to Tokyo right now.",
+                        translation: "如果她有翅膀（事實上她沒有），她現在就會飛去東京。",
+                        options: [
+                            { text: "had", correct: true },
+                            { text: "has", correct: false },
+                            { text: "have", correct: false },
+                            { text: "would have", correct: false }
+                        ],
+                        explanation: "這是不可能實現的幻想（Type 2）。If 子句中要使用過去式動詞，因此 'have' 的過去式是 <b>'had'</b>。"
+                    },
+                    {
+                        sentence: "They <span class='text-purple-400 underline decoration-wavy'>would travel</span> around the world if they <span class='text-purple-400 underline decoration-wavy'>______</span> rich.",
+                        translation: "如果他們很有錢的話，他們就會環遊世界（事實上目前沒那麼有錢）。",
+                        options: [
+                            { text: "were", correct: true },
+                            { text: "are", correct: false },
+                            { text: "will be", correct: false },
+                            { text: "would be", correct: false }
+                        ],
+                        explanation: "這是一個現在非事實的設想（Type 2）。主要子句已經有了 'would travel'，If 子句需要過去式動詞，主語是複數 'they'，Be動詞採用過去式 <b>'were'</b>。"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Level 4: 👾 終極混合考驗",
+                subtitle: "Ultimate Boss Battle (Mixed)",
+                desc: "各大條件句混合！時空混亂的最深處，證明你的文法實力！",
+                color: "yellow",
+                questions: [
+                    {
+                        sentence: "If you <span class='text-yellow-400 underline decoration-wavy'>mix</span> red and yellow, you <span class='text-yellow-400 underline decoration-wavy'>______</span> orange.",
+                        translation: "如果你把紅色和黃色混合，你會得到橙色。",
+                        options: [
+                            { text: "get", correct: true },
+                            { text: "would get", correct: false },
+                            { text: "got", correct: false },
+                            { text: "will got", correct: false }
+                        ],
+                        explanation: "這是科學與色彩原理常理（Type 0）。應使用 [Present Simple + Present Simple]。主語是 'you'，所以用原形動詞 'get'。"
+                    },
+                    {
+                        sentence: "What <span class='text-yellow-400 underline decoration-wavy'>______</span> you do if you saw a UFO?",
+                        translation: "如果你看見飛碟（極不尋常/幻想），你會做什麼？",
+                        options: [
+                            { text: "would", correct: true },
+                            { text: "will", correct: false },
+                            { text: "do", correct: false },
+                            { text: "did", correct: false }
+                        ],
+                        explanation: "If 子句動詞是 'saw' (過去式)，表示這是幻想/假設性的問題（Type 2），主要問句需要使用助動詞 <b>'would'</b>。"
+                    },
+                    {
+                        sentence: "We <span class='text-yellow-400 underline decoration-wavy'>will arrive</span> late if the train <span class='text-yellow-400 underline decoration-wavy'>______</span> delayed.",
+                        translation: "如果火車延誤，我們就會遲到。",
+                        options: [
+                            { text: "is", correct: true },
+                            { text: "was", correct: false },
+                            { text: "will be", correct: false },
+                            { text: "would be", correct: false }
+                        ],
+                        explanation: "這是極可能發生的生活未來預期（Type 1）。主要子句是 'will arrive'，If 引導的子句要用現在簡單式。'train' 為單數，Be動詞用 <b>'is'</b>。"
+                    },
+                    {
+                        sentence: "If he <span class='text-yellow-400 underline decoration-wavy'>had</span> more time, he <span class='text-yellow-400 underline decoration-wavy'>______</span> the piano.",
+                        translation: "如果他有更多時間（但實際上沒有），他就會練習鋼琴。",
+                        options: [
+                            { text: "would practice", correct: true },
+                            { text: "will practice", correct: false },
+                            { text: "practiced", correct: false },
+                            { text: "practices", correct: false }
+                        ],
+                        explanation: "這是一個與現在事實相反的假設（Type 2）。If 子句是 'had' (過去式)，主要子句應採用 <b>[would + 動詞原形]</b>。"
+                    }
+                ]
+            }
+        ];
+
+        // ================= GAMEPLAY STATE MANAGEMENT =================
+        let userProgress = {
+            unlockedLevels: [0], // Level 0 is unlocked by default
+            highScores: {}
+        };
+
+        let currentLevelIndex = 0;
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        let currentLevelScore = 0;
+        let levelCorrectAnswers = 0;
+
+        // Load progress from localStorage if exists
+        function loadSavedProgress() {
+            const saved = localStorage.getItem('conditional_quest_progress');
+            if (saved) {
+                try {
+                    userProgress = JSON.parse(saved);
+                } catch(e) {
+                    console.log("Error loading progress");
+                }
+            }
+            updateGlobalBadge();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('conditional_quest_progress', JSON.stringify(userProgress));
+            updateGlobalBadge();
+        }
+
+        function updateGlobalBadge() {
+            const badge = document.getElementById('global-progress-badge');
+            const totalLevels = levelsData.length;
+            const completedCount = userProgress.unlockedLevels.length - 1;
+            
+            if (completedCount === totalLevels - 1 && userProgress.unlockedLevels.includes(totalLevels - 1)) {
+                // If all levels are solved
+                badge.innerText = "已解鎖全部關卡 🏆";
+                badge.className = "bg-yellow-900/80 text-yellow-200 px-3 py-1 rounded-full font-bold";
+            } else {
+                badge.innerText = `解鎖進度: ${userProgress.unlockedLevels.length} / ${totalLevels}`;
+                badge.className = "bg-purple-900/80 text-purple-200 px-3 py-1 rounded-full font-bold";
+            }
+        }
+
+        function resetGameProgress() {
+            userProgress = {
+                unlockedLevels: [0],
+                highScores: {}
+            };
+            saveProgress();
+            showScreen('screen-intro');
+        }
+
+        // Screen Navigator
+        function showScreen(screenId) {
+            const screens = ['screen-intro', 'screen-level-select', 'screen-gameplay', 'screen-level-complete', 'screen-game-over', 'screen-victory'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            // Specific UI logic on screen load
+            if (screenId === 'screen-level-select') {
+                renderLevelSelection();
+            }
+        }
+
+        function goHome() {
+            stopConfetti();
+            showScreen('screen-intro');
+        }
+
+        // Start button handler
+        function startAdventure() {
+            showScreen('screen-level-select');
+        }
+
+        // Render Level Selection Menu
+        function renderLevelSelection() {
+            const container = document.getElementById('level-list-container');
+            container.innerHTML = '';
+
+            levelsData.forEach((level, index) => {
+                const isUnlocked = userProgress.unlockedLevels.includes(index);
+                const highScore = userProgress.highScores[index] || 0;
+                
+                let statusBadgeHTML = '';
+                let cardClass = '';
+                let actionHTML = '';
+
+                if (isUnlocked) {
+                    let colorClass = 'border-purple-500/40 bg-slate-900/80';
+                    if (level.color === 'cyan') colorClass = 'border-cyan-500/40 bg-slate-900/80';
+                    if (level.color === 'pink') colorClass = 'border-pink-500/40 bg-slate-900/80';
+                    if (level.color === 'yellow') colorClass = 'border-yellow-500/40 bg-slate-900/80 hover:border-yellow-500/70';
+
+                    cardClass = `${colorClass} cursor-pointer hover:scale-[1.02] transform transition-all duration-200 border-2 shadow-lg`;
+                    
+                    statusBadgeHTML = highScore > 0 
+                        ? `<span class="bg-green-900/60 text-green-300 text-xs font-bold px-3 py-1 rounded-full">已通關 (最高分: ${highScore})</span>`
+                        : `<span class="bg-indigo-950 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">未挑戰</span>`;
+                    
+                    actionHTML = `
+                        <button onclick="launchLevel(${index})" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 px-5 py-2.5 rounded-xl font-bold text-sm text-white shadow-md">
+                            立刻傳送 🚀
+                        </button>
+                    `;
+                } else {
+                    cardClass = 'border-slate-800 bg-slate-950/40 opacity-60 cursor-not-allowed border';
+                    statusBadgeHTML = `<span class="bg-slate-900 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">🔒 尚未解鎖</span>`;
+                    actionHTML = `<span class="text-xs text-slate-500">完成前一關即可解鎖</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${cardClass}`;
+                if (isUnlocked) {
+                    card.onclick = (e) => {
+                        // Prevent triggering action if they explicitly clicked the inner button
+                        if (e.target.tagName !== 'BUTTON') {
+                            launchLevel(index);
+                        }
+                    };
+                }
+
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold text-slate-100">${level.title}</h3>
+                            ${statusBadgeHTML}
+                        </div>
+                        <p class="text-xs text-slate-400 font-mono font-bold tracking-wide">${level.subtitle}</p>
+                        <p class="text-sm text-slate-300 max-w-md">${level.desc}</p>
+                    </div>
+                    <div class="self-end md:self-auto shrink-0">
+                        ${actionHTML}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Initialize and launch a specific level
+        function launchLevel(levelId) {
+            currentLevelIndex = levelId;
+            currentQuestionIndex = 0;
+            lives = 3;
+            currentLevelScore = 0;
+            levelCorrectAnswers = 0;
+            
+            showScreen('screen-gameplay');
+            loadQuestion();
+        }
+
+        // Render current question
+        function loadQuestion() {
+            const level = levelsData[currentLevelIndex];
+            const q = level.questions[currentQuestionIndex];
+
+            // Update header status
+            const badge = document.getElementById('level-badge');
+            badge.innerText = level.title.split(':')[0]; // get "Level X"
+            
+            // Set dynamic level-specific accent colors
+            if (level.color === 'cyan') {
+                badge.className = "bg-cyan-600 text-white text-xs md:text-sm font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider";
+            } else if (level.color === 'pink') {
+                badge.className = "bg-pink-600 text-white text-xs md:text-sm font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider";
+            } else if (level.color === 'purple') {
+                badge.className = "bg-purple-600 text-white text-xs md:text-sm font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider";
+            } else if (level.color === 'yellow') {
+                badge.className = "bg-yellow-500 text-slate-900 text-xs md:text-sm font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider";
+            }
+
+            renderLives();
+            document.getElementById('score-display').innerText = score + currentLevelScore;
+
+            // Calculate progress bar width
+            const totalQuestions = level.questions.length;
+            const progressPct = (currentQuestionIndex / totalQuestions) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPct}%`;
+
+            // Set question text
+            document.getElementById('sentence-text').innerHTML = q.sentence;
+            document.getElementById('sentence-translation').innerText = q.translation;
+
+            // Render option buttons
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            // Shuffle options slightly to make it dynamic
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-slate-800/80 hover:bg-slate-700/80 text-left p-4 md:p-5 rounded-2xl border-2 border-slate-700/50 hover:border-indigo-500/50 text-slate-100 font-bold text-base md:text-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex justify-between items-center";
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <span class="text-xs text-slate-500 border border-slate-700 px-2.5 py-1 rounded-lg">選擇</span>
+                `;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        // Render Heart Lives
+        function renderLives() {
+            const container = document.getElementById('lives-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    container.innerHTML += `<span class="text-pink-500">❤️</span>`;
+                } else {
+                    container.innerHTML += `<span class="text-slate-700">🖤</span>`;
+                }
+            }
+        }
+
+        // Handle selected answer
+        function checkAnswer(selectedOption, clickedButton) {
+            const level = levelsData[currentLevelIndex];
+            const q = level.questions[currentQuestionIndex];
+            
+            const modal = document.getElementById('feedback-modal');
+            const box = document.getElementById('feedback-box');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const subtitle = document.getElementById('feedback-subtitle');
+            const explainer = document.getElementById('feedback-explanation');
+
+            // Sound, Animation & Visual States
+            if (selectedOption.correct) {
+                playSound('correct');
+                
+                // Add points
+                const ptsEarned = 150;
+                currentLevelScore += ptsEarned;
+                levelCorrectAnswers++;
+
+                // Setup feedback UI
+                box.className = "w-full max-w-md p-6 md:p-8 rounded-3xl border-2 border-green-500/60 bg-slate-900 text-center space-y-6 transform scale-100 opacity-100 transition-all duration-300";
+                icon.innerText = "⭐";
+                title.innerText = "非常正確！";
+                title.className = "text-2xl md:text-3xl font-extrabold text-green-400";
+                subtitle.innerText = `時空穩定度增加！獲得 +${ptsEarned} 分`;
+            } else {
+                playSound('wrong');
+                lives--;
+                
+                // Card shake effect on wrong answer
+                document.getElementById('question-card').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('question-card').classList.remove('shake');
+                }, 500);
+
+                box.className = "w-full max-w-md p-6 md:p-8 rounded-3xl border-2 border-red-500/60 bg-slate-900 text-center space-y-6 transform scale-100 opacity-100 transition-all duration-300";
+                icon.innerText = "💥";
+                title.innerText = "時空失控！答錯了";
+                title.className = "text-2xl md:text-3xl font-extrabold text-red-400";
+                
+                const rightOpt = q.options.find(o => o.correct).text;
+                subtitle.innerHTML = `失去 1 點生命！正確答案應該是: <span class="text-yellow-400 font-extrabold">${rightOpt}</span>`;
+            }
+
+            // Write grammatical explanation
+            explainer.innerHTML = q.explanation;
+
+            // Show feedback popover modal
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        // Trigger transition to next action
+        function closeFeedbackAndContinue() {
+            // Hide feedback modal
+            const modal = document.getElementById('feedback-modal');
+            const box = document.getElementById('feedback-box');
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                
+                // Determine next state
+                if (lives <= 0) {
+                    showScreen('screen-game-over');
+                } else {
+                    currentQuestionIndex++;
+                    const level = levelsData[currentLevelIndex];
+                    
+                    if (currentQuestionIndex >= level.questions.length) {
+                        // Level complete!
+                        handleLevelComplete();
+                    } else {
+                        loadQuestion();
+                    }
+                }
+            }, 300);
+        }
+
+        // Handle end of level
+        function handleLevelComplete() {
+            stopConfetti(); // reset
+            playSound('victory');
+            startConfetti();
+
+            // Accumulate score
+            score += currentLevelScore;
+
+            // Calculate stars (1-3 based on lives remaining)
+            let stars = 1;
+            if (lives === 3) stars = 3;
+            else if (lives === 2) stars = 2;
+
+            // Star UI generator
+            const starsContainer = document.getElementById('stars-display');
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < stars) {
+                    starsContainer.innerHTML += `<span class="text-yellow-400 animate-bounce" style="animation-delay: ${i*0.1}s">⭐</span>`;
+                } else {
+                    starsContainer.innerHTML += `<span class="text-slate-700">⭐</span>`;
+                }
+            }
+
+            // Save Progress & Unlock Next Level
+            const scoreSaved = userProgress.highScores[currentLevelIndex] || 0;
+            if (currentLevelScore > scoreSaved) {
+                userProgress.highScores[currentLevelIndex] = currentLevelScore;
+            }
+
+            // Unlock next level index
+            const nextIdx = currentLevelIndex + 1;
+            if (nextIdx < levelsData.length && !userProgress.unlockedLevels.includes(nextIdx)) {
+                userProgress.unlockedLevels.push(nextIdx);
+            }
+            saveProgress();
+
+            // Update stats displayed in screen-level-complete
+            document.getElementById('lc-score').innerText = `${currentLevelScore} pts`;
+            document.getElementById('lc-accuracy').innerText = `${levelCorrectAnswers} / ${levelsData[currentLevelIndex].questions.length}`;
+            
+            let livesStr = '';
+            for(let l=0; l<lives; l++) livesStr += '❤️ ';
+            document.getElementById('lc-lives').innerText = livesStr;
+
+            const nextBtn = document.getElementById('next-level-btn');
+            if (currentLevelIndex === levelsData.length - 1) {
+                // Was the ultimate boss level!
+                document.getElementById('level-complete-desc').innerText = "你擊敗了終極語法Boss，守護了全宇宙！";
+                nextBtn.innerText = "領取大師證書 🏆";
+            } else {
+                document.getElementById('level-complete-desc').innerText = "太棒了！這個時空維度的裂縫已被成功修復。";
+                nextBtn.innerText = "前往下一關 🚀";
+            }
+
+            showScreen('screen-level-complete');
+        }
+
+        // Handle next level routing
+        function nextAction() {
+            stopConfetti();
+            if (currentLevelIndex === levelsData.length - 1) {
+                // Trigger global master victory
+                document.getElementById('final-score').innerText = score;
+                showScreen('screen-victory');
+            } else {
+                // Load next level directly
+                launchLevel(currentLevelIndex + 1);
+            }
+        }
+
+        function retryCurrentLevel() {
+            launchLevel(currentLevelIndex);
+        }
+
+        // ================= INTERACTIVE RULES DRAWER (CHEAT SHEET) =================
+        function toggleCheatSheet() {
+            const modal = document.getElementById('cheat-sheet-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Initial launch
+        window.onload = function() {
+            loadSavedProgress();
+            showScreen('screen-intro');
+        }
+    </script>
+</body>
+</html>
